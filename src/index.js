@@ -2,11 +2,18 @@ import "../dist/styles.output.css";
 import axios from "axios";
 import * as cheerio from "cheerio";
 
-export function testJs(options = {}) {
+export function linkPreview(options = {}) {
   let cacheTtl = options.cacheTtl ?? 30 * 60;
 
-  let metaFetch = async (url) => {
-    let now = new Date().getTime() / 1000;
+  /**
+   * Fetches metadata for a given URL, either from the local cache or by making
+   * a request to the server.
+   *
+   * @param {string} url - The URL to fetch metadata for.
+   * @returns {Promise<Object>} - A Promise that resolves with metadata.
+   */
+  async function metaFetch(url) {
+    const now = new Date().getTime() / 1000;
 
     let meta = {
       title: "",
@@ -29,7 +36,7 @@ export function testJs(options = {}) {
       const metaTags = $("meta");
       meta.title = $("title").text();
 
-      metaTags.each((i, tag) => {
+      for (let tag of metaTags) {
         const name = $(tag).attr("name") ?? $(tag).attr("itemprop");
         const content = $(tag).attr("content");
 
@@ -49,7 +56,7 @@ export function testJs(options = {}) {
           default:
             break;
         }
-      });
+      }
 
       localStorage.setItem(`link-preview-${url}`, JSON.stringify(meta));
 
@@ -57,55 +64,119 @@ export function testJs(options = {}) {
     } catch (error) {
       console.error(error);
     }
-  };
+  }
 
+  /**
+   * The main application object.
+   *
+   * @type {Object}
+   */
   let app = {
+    /**
+     * An array of links to apply the link preview to.
+     *
+     * @type {NodeList}
+     */
     links: [],
+    /**
+     * Options for configuring the link preview.
+     *
+     * @type {Object}
+     */
     options: {},
 
-    init(links, options) {
-      this.links = links;
-      this.options = options;
+    /**
+     * Initializes the link preview application.
+     *
+     * @param {Object} options - Configuration options for the link preview.
+     */
+    init(options) {
+      this.options = {
+        selector: options.selector || "data-link-preview",
+        defaultClass: options.defaultClass || "__lp-preview",
+        rootClass:
+          options.rootClass ||
+          "pt-1 text-slate-600 transition w-[280px] duration-300",
+        containerClass:
+          options.containerClass || "bg-white rounded border overflow-hidden",
+        imageClass: options.imageClass || "h-[140px] w-full object-cover",
+        contentClass: options.contentClass || "px-4 py-2",
+        titleClass: options.titleClass || "line-clamp-1 font-semibold mb-2",
+        descriptionClass:
+          options.descriptionClass || "line-clamp-2 leading-tight",
+        zIndex: options.zIndex || 100,
+        transitionInDelay: options.transitionInDelay || 50,
+        transitionOutDelay: options.transitionOutDelay || 350,
+      };
+      this.links = document.querySelectorAll(`[${this.options.selector}]`);
 
       this.listen();
     },
 
+    /**
+     * Adds event listeners to the links for mouseover and mouseout events.
+     */
     listen() {
-      if (this.links != []) {
-        for (let link of this.links) {
-          link.addEventListener("mouseover", this.renderPreview);
-          link.addEventListener("mouseout", this.destroyRender);
-        }
+      if (this.links.length === 0) {
+        return;
+      }
+
+      for (let link of this.links) {
+        link.addEventListener("mouseover", this.renderPreview);
+        link.addEventListener("mouseout", this.destroyRender);
       }
     },
 
+    /**
+     * Generates the HTML template for the link preview.
+     *
+     * @param {Object} bound - The bounding rectangle of the link.
+     * @param {Object} metaTags - Metadata for the link.
+     *
+     * @returns {string} - The HTML template for the link preview.
+     */
     getTemplate(bound, metaTags) {
-      let options = app.options;
+      let {
+        defaultClass,
+        rootClass,
+        containerClass,
+        imageClass,
+        contentClass,
+        titleClass,
+        descriptionClass,
+        zIndex,
+      } = app.options;
+
+      let { title, description, image } = metaTags;
+
       let styles = `
         position: absolute;
         top: ${bound.height};
         left: 0;
         opacity: 0;
-        z-index: ${options.zIndex};
+        z-index: ${zIndex};
       `;
 
+      let imgSection = `<img src="${image}" class="${imageClass}">`;
+      let titleSection = `<h3 class="${titleClass}">${title}</h3>`;
+      let descriptionSection = `<p class="${descriptionClass}">${description}</p>`;
+
       return `
-        <div class="${options.defaultClass} ${options.rootClass}" style="${styles}">
-          <div class="${options.containerClass}">
-            <img src="${metaTags.image}" class="${options.imageClass}">
-            <div class="${options.contentClass}">
-              <h3 class="${options.titleClass}">
-                ${metaTags.title}
-              </h3>
-              <p class="${options.descriptionClass}">
-                ${metaTags.description}
-              </p>
+        <div class="${defaultClass} ${rootClass}" style="${styles}">
+          <div class="${containerClass}">
+            ${imgSection}
+            <div class="${contentClass}">
+              ${titleSection}
+              ${descriptionSection}
             </div>
           </div>
         </div>
       `;
     },
 
+    /**
+     * Displays the link preview by setting the opacity of the previews to 1.
+     */
     displayPreview() {
       let previews = document.querySelectorAll(`.${app.options.defaultClass}`);
 
@@ -114,24 +185,36 @@ export function testJs(options = {}) {
       }
     },
 
-    renderPreview(e) {
-      let anchor = e.target;
+    /**
+     * Renders the link preview when a link is hovered over.
+     * @param {Event} event - The mouseover event.
+     */
+    renderPreview(event) {
+      let anchor = event.target;
       let bound = anchor.getBoundingClientRect();
 
-      if (typeof anchor.getAttribute("data-link-preview") != "string") {
+      if (typeof anchor.getAttribute(app.options.selector) !== "string") {
         return;
       }
 
       (async () => {
-        let metaTags = await metaFetch(anchor.getAttribute("href"));
-        let template = app.getTemplate(bound, metaTags);
+        try {
+          let metaTags = await metaFetch(anchor.getAttribute("href"));
+          let template = app.getTemplate(bound, metaTags);
 
-        anchor.style.position = "relative";
-        anchor.innerHTML += template;
-        setTimeout(() => app.displayPreview(), app.options.transitionInDelay);
+          anchor.style.position = "relative";
+          anchor.insertAdjacentHTML("beforeend", template);
+          setTimeout(() => app.displayPreview(), app.options.transitionInDelay);
+        } catch (error) {
+          console.error(error);
+        }
       })();
     },
 
+    /**
+     * Destroys the link preview by setting the opacity of the previews to 0 and
+     * removing them after a delay.
+     */
     destroyRender() {
       let previews = document.querySelectorAll(`.${app.options.defaultClass}`);
 
@@ -142,17 +225,8 @@ export function testJs(options = {}) {
     },
   };
 
-  app.init(document.querySelectorAll("[data-link-preview]"), {
-    defaultClass: "__lp-preview",
-    rootClass: "pt-1 text-slate-600 transition w-[280px] duration-300",
-    containerClass: "bg-white rounded border overflow-hidden",
-    imageClass: "h-[140px] w-full object-cover",
-    contentClass: "px-4 py-2",
-    titleClass: "line-clamp-1 font-semibold mb-2",
-    descriptionClass: "line-clamp-2 leading-tight",
-    zIndex: 100,
-    transitionInDelay: 50,
-    transitionOutDelay: 350,
-    ...options,
-  });
+  /**
+   * Initializes the link preview application with default options.
+   */
+  app.init(options);
 }
