@@ -1,0 +1,38 @@
+{
+  "name": "link-preview",
+  "version": "1.0.0",
+  "description": "Preview link info on hover",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx tailwindcss -i ./src/styles.css -o ./dist/styles.output.css --minify"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheBikramLama/link-preview.git"
+  },
+  "keywords": [
+    "js",
+    "link",
+    "preview",
+    "hover",
+    "link",
+    "preview",
+    "hover",
+    "card",
+    "preview"
+  ],
+  "author": "Bikram Lama",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TheBikramLama/link-preview/issues"
+  },
+  "homepage": "https://github.com/TheBikramLama/link-preview#readme",
+  "dependencies": {
+    "autoprefixer": "^10.4.16",
+    "axios": "^1.5.1",
+    "cheerio": "^1.0.0-rc.12",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.3"
+  }
+}
