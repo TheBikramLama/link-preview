@@ -12,18 +12,14 @@
     "url": "git+https://github.com/TheBikramLama/link-preview.git"
   },
   "keywords": [
-    "js",
     "link",
-    "preview",
     "hover",
-    "link",
+    "url",
     "preview",
-    "hover",
-    "card",
-    "preview"
+    "card"
   ],
   "author": "Bikram Lama",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/TheBikramLama/link-preview/issues"
   },
