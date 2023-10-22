@@ -2,14 +2,14 @@
 
 ## Overview
 
-`link-preview` is a JavaScript package that provides a simple and customizable link preview functionality. It fetches metadata for a given URL and displays a preview when a link is hovered over.
+`tb-link-preview` is a JavaScript package that provides a simple and customizable link preview functionality. It fetches metadata for a given URL and displays a preview when a link is hovered over.
 
 ## Installation
 
 Install the package using npm:
 
 ```bash
-npm install link-preview
+npm install tb-link-preview
 ```
 
 ## Usage
@@ -17,7 +17,7 @@ npm install link-preview
 Import the package in your JavaScript file:
 
 ```javascript
-import { linkPreview } from "link-preview";
+import { linkPreview } from "tb-link-preview";
 
 // Initialize link preview with default options
 linkPreview();
@@ -36,7 +36,7 @@ linkPreview({
 ## Options
 
 -   `cacheTtl` (default: 1800): Time-to-live for caching link metadata in seconds.
--   `selector` (default: 'data-link-preview'): Attribute used to select links for preview.
+-   `selector` (default: 'data-tb-link-preview'): Attribute used to select links for preview.
 -   `defaultClass` (default: '__lp-preview'): Default class for the link preview.
 -   ... and more customizable styling and behavior options.
 
@@ -57,12 +57,12 @@ linkPreview({
         <link rel="stylesheet" href="../dist/styles.output.css" />
     </head>
     <body>
-        <a href="https://example.com" data-link-preview
+        <a href="https://example.com" data-tb-link-preview
             >Hover me for a preview</a
         >
 
         <script type="module">
-            import { linkPreview } from "link-preview";
+            import { linkPreview } from "tb-link-preview";
 
             linkPreview();
         </script>

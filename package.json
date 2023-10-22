@@ -1,5 +1,5 @@
 {
-  "name": "link-preview",
+  "name": "tb-link-preview",
   "version": "1.0.0",
   "description": "Preview link info on hover",
   "main": "src/index.js",
