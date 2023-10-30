@@ -107,7 +107,7 @@ export function linkPreview(options = {}) {
         zIndex: options.zIndex || 100,
         transitionInDelay: options.transitionInDelay || 50,
         transitionOutDelay: options.transitionOutDelay || 350,
-        debug: options.debug || false,
+        debug: options.debug || false
       };
       this.links = document.querySelectorAll(`[${this.options.selector}]`);
 
@@ -198,6 +198,10 @@ export function linkPreview(options = {}) {
         return;
       }
 
+      if (!!app.options.debug) {
+        app.deletePreviews();
+      }
+
       (async () => {
         try {
           let metaTags = await metaFetch(anchor.getAttribute("href"));
@@ -212,6 +216,15 @@ export function linkPreview(options = {}) {
       })();
     },
 
+    deletePreviews() {
+      let previews = document.querySelectorAll(`.${app.options.defaultClass}`);
+
+      for (let preview of previews) {
+        preview.style.opacity = 0;
+        setTimeout(() => preview.remove(), app.options.transitionOutDelay);
+      }
+    },
+
     /**
      * Destroys the link preview by setting the opacity of the previews to 0 and
      * removing them after a delay.
@@ -221,12 +234,7 @@ export function linkPreview(options = {}) {
         return;
       }
 
-      let previews = document.querySelectorAll(`.${app.options.defaultClass}`);
-
-      for (let preview of previews) {
-        preview.style.opacity = 0;
-        setTimeout(() => preview.remove(), app.options.transitionOutDelay);
-      }
+      app.deletePreviews();
     },
   };
 
@@ -234,4 +242,6 @@ export function linkPreview(options = {}) {
    * Initializes the link preview application with default options.
    */
   app.init(options);
+
+  return app;
 }
