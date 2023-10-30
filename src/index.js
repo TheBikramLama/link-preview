@@ -92,7 +92,7 @@ export function linkPreview(options = {}) {
      */
     init(options) {
       this.options = {
-        selector: options.selector || "data-link-preview",
+        selector: options.selector || "data-tb-link-preview",
         defaultClass: options.defaultClass || "__lp-preview",
         rootClass:
           options.rootClass ||
@@ -107,6 +107,7 @@ export function linkPreview(options = {}) {
         zIndex: options.zIndex || 100,
         transitionInDelay: options.transitionInDelay || 50,
         transitionOutDelay: options.transitionOutDelay || 350,
+        debug: options.debug || false,
       };
       this.links = document.querySelectorAll(`[${this.options.selector}]`);
 
@@ -216,6 +217,10 @@ export function linkPreview(options = {}) {
      * removing them after a delay.
      */
     destroyRender() {
+      if (!!app.options.debug) {
+        return;
+      }
+
       let previews = document.querySelectorAll(`.${app.options.defaultClass}`);
 
       for (let preview of previews) {
