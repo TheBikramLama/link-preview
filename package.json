@@ -1,6 +1,6 @@
 {
   "name": "tb-link-preview",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Preview link (meta) info on hover",
   "main": "src/index.js",
   "scripts": {
